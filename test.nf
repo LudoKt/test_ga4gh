@@ -37,7 +37,7 @@ process samtools_view {
     script:
     """
     echo "Running samtools view on ${input}" >&2
-    samtools view -c ${input}
+    echo "Coucou"
     """
 }
 
