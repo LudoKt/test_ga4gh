@@ -1,22 +1,44 @@
-params.input_file // Définition du paramètre input_file
+#!/usr/bin/env nextflow
 
-// Processus pour lire le contenu du fichier
-process read_file {
-    input:
-    file(input_file) from params.input_file
+params.input = null
+
+input = params.input
+
+def helpMessage(message) {
+    log.info"""
+    ${message}
+
+    Count the number of reads of a SAM/BAM/CRAM file using samtools view and print to stdout
+
+    Usage:
+
+    nextflow run jb-adams/samtools-view-count-nf --input \${INPUT}
+
+    Mandatory arguments:
+      --input    [string] local path or URL to input SAM/BAM/CRAM
+    
+    Optional arguments:
+      --help     [flag] display this help message and exit
+    
+    """.stripIndent()
+}
+
+if (params.help) exit 0, helpMessage("")
+
+if (input == null) {
+    exit 1, helpMessage("ERROR: no --input specified")
+}
+
+process samtools_view {
 
     output:
-    stdout result // Résultat de la lecture du fichier
+    stdout samtools_view
 
     script:
     """
-    cat ${input_file}
+    echo "Running samtools view on ${input}" >&2
+    samtools view -c ${input}
     """
 }
 
-// Workflow principal
-workflow {
-    // Exécuter le processus read_file avec le fichier en entrée
-    read_file(input_file)
-}
-
+samtools_view.view {it.trim()}
